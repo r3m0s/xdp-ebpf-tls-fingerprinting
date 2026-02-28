@@ -58,6 +58,9 @@ Test with wget and python clients to get other fingerprints:
 
 You could also try a request with a client certificate `curl --insecure -v --key key.pem --cert cert.pem https://127.0.0.1`.
 
+> [!WARNING]  
+> Please note that the minimal python webserver will render itself unresponsive when sessions are terminated abpruptly by the XDP eBPF module and must be restarted to handle subsequent non-malicious requests again. This limitation could be worked around by running a fully-fledged nginx webserver that handles timeouts correctly. A samble `nginx.conf` is provided in the project.  
+
 ## Remote Testing
 1. Load eBPF to ens3/eth0 interface: `sudo ./xdp_ebpf_loader.o ens3 xdp_ebpf_module.bpf`
 2. Do `curl https://google.com`
