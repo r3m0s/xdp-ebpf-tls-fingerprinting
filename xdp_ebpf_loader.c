@@ -35,6 +35,10 @@ struct fingerprint_event {
     uint8_t has_formats;
     uint8_t sni_present;
     uint8_t alpn[4];
+    uint32_t src_ip;
+    uint32_t dst_ip;
+    uint16_t src_port;
+    uint16_t dst_port;
 };
 
 // obj struct for operating on bpf object
@@ -112,20 +116,15 @@ static void handle_event(void *ctx, int cpu, void *data, uint32_t size) {
     ja3_hash(fmt_tls_fingerprint, ja3);
 
     // hash to pass decision for specific fingerprint back to kernel space
-    uint64_t hash = 0x4D55;
-    hash = ((hash << 5) + hash) ^ event->version;
-    for (int i = 0; i < MAX_TLS_CIPHER_SUITES && i < event->ciphers_count; i++)
-        hash = ((hash << 5) + hash) ^ event->ciphers[i];
-    for (int i = 0; i < MAX_TLS_EXTENSIONS && i < event->extensions_count; i++)
-        hash = ((hash << 5) + hash) ^ event->extensions[i];
+    uint32_t session_hash = 0xEB9FAD55 ^ event->src_ip ^ event->dst_ip ^ event->src_port ^ event->dst_port;
 
-    printf("Userspace hashmap hash: %lx\n\n", hash);
+    printf("Userspace hashmap session hash: %x\n\n", session_hash);
 
     // decide on whether hash is malicious or not
     uint8_t decision = strncmp(ja3, BLOCKED_JA3_HASH, 32) == 0 ? 0 : 1;
 
     // send decision back to kernel space
-    bpf_map_update_elem(decisions_fd, &hash, &decision, BPF_ANY);
+    bpf_map_update_elem(decisions_fd, &session_hash, &decision, BPF_ANY);
 
     printf("TLS client fingerprint:\n%s\n\n", fmt_tls_fingerprint);
     printf("JA3 MD5 hash:\n%s\n\n", ja3);

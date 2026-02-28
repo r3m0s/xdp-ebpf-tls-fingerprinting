@@ -14,6 +14,4 @@ xdp_ebpf_loader.o: xdp_ebpf_loader.c
 	$(CC) $(CFLAGS) -o $@ $^ -lbpf -lssl -lcrypto
 
 clean:
-
-mrproper:
 	rm -f *.bpf *.o

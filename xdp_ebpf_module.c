@@ -38,6 +38,10 @@ struct fingerprint_event {
     uint8_t has_formats;
     uint8_t sni_present;
     uint8_t alpn[4];
+    uint32_t src_ip;
+    uint32_t dst_ip;
+    uint16_t src_port;
+    uint16_t dst_port;
 };
 
 // Linux performance counter (PCL) event arrays for line-rate TLS fingerprinting and hashing in user-space (placed in .maps ELF section)
@@ -52,12 +56,12 @@ struct {
     __uint(max_entries, 0);
 } fingerprint_events SEC(".maps");
 
-// hash map for passing decisions from user space to kernel
+// Least Recently Used (LRU) hash map for passing decisions from user space to kernel and automatically removing least recently used items from the map
 struct {
-    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(type, BPF_MAP_TYPE_LRU_HASH);
     __uint(max_entries, 65536);
-    // hashed event for reference
-    __type(key, uint64_t);
+    // hashed IP/ports for session-based reference
+    __type(key, uint32_t);
     // value is 1 for pass and 0 for drop
     __type(value, uint8_t);
 } decisions SEC(".maps");
@@ -129,6 +133,20 @@ int minimal_xdp(struct xdp_md *ctx) {
             return XDP_PASS;
         }
         bpf_printk("Appyling fingerprinting for HTTPS/TLS packet detected on port 443\n");
+
+        // store IPs and ports for session tracking
+        ev.src_ip = iph->saddr;
+        ev.dst_ip = iph->daddr;
+        ev.src_port = bpf_ntohs(tcp->source);
+        ev.dst_port = bpf_ntohs(tcp->dest);
+
+        // check running TCP sessions for block decision updates in the hash map and drop if applicable
+        uint32_t session_hash = 0xEB9FAD55 ^ ev.src_ip ^ ev.dst_ip ^ ev.src_port ^ ev.dst_port;
+        uint8_t *decision = bpf_map_lookup_elem(&decisions, &session_hash);
+        if (decision && *decision == 0) {
+            bpf_printk("MALICIOUS TLS CLIENT PACKETS DROPPED FOR RUNNING SESSION %04x\n", session_hash);
+            return XDP_DROP;
+        }
 
         // read 4-byte data offset value at 96-bit offset in TCP header which specifies the length (min 5, max 15) of the header in 32-bit (4 bytes) words
         uint8_t tcp_data_offset = tcp->doff * (32 / 8);
@@ -430,17 +448,9 @@ int minimal_xdp(struct xdp_md *ctx) {
             // submit event to user space loader for MD5 hashing: Use current CPU ID as map index (CPU that processes network packet) to spread and scale events accross individual ring buffers
             bpf_perf_event_output(ctx, &fingerprint_events, BPF_F_CURRENT_CPU, &ev, sizeof(ev));
 
-            uint64_t hash = 0x4D55;
-            // (hash << 5) multiplies hash by 2^5=32
-            hash = ((hash << 5) + hash) ^ ev.version;
-            for (int i = 0; i < MAX_TLS_CIPHER_SUITES && i < ev.ciphers_count; i++)
-                hash = ((hash << 5) + hash) ^ ev.ciphers[i];
-            for (int i = 0; i < MAX_TLS_EXTENSIONS && i < ev.extensions_count; i++)
-                hash = ((hash << 5) + hash) ^ ev.extensions[i];
+            bpf_printk("Kernelspace hashmap session hash = %x\n", session_hash);
 
-            bpf_printk("Kernelspace hashmap hash = %lx\n", hash);
-
-            void *val = bpf_map_lookup_elem(&decisions, &hash);
+            void *val = bpf_map_lookup_elem(&decisions, &session_hash);
             uint8_t decision = 255;
             if (val) decision = *((uint8_t *)val);
 
