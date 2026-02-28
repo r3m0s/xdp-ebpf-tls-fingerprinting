@@ -99,7 +99,17 @@ OURS: 771,4866-4867-4865-49196-49200-159-52393-52392-52394-49195-49199-158-49188
 ## Extra Tools
 The folder "Tools" contains two extra C-programs which generate TLS fingerprints using the OpenSSL "EVP" API.\
 The `string2ja3` file produces a 32-character JA3 jhash of the raw TLS handshake string using MD5.\
-The `string2ja4` file produces a JA4 fingerprint using SHA-256, but keeping the protocol prefix in plaintext.
+Sample output:
+```sh
+./string2ja3 "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,45-16-35-0-23-65281-5-13-51-11-65037-43-27-10-18-17613,4588-29-23-24,0"
+df37f2fd952c0b0b586cf0d9d850c8b2
+```
+The `string2ja4` file produces a JA4 fingerprint using SHA-256, but keeping the protocol prefix in plaintext.\
+Sample output:
+```sh
+./string2ja4 t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601
+t13d1516h2_8daaf6152771_d8a2da3f94cd
+```
 
 ## Cleanup
 - `sudo ip link set dev lo xdpgeneric off`
