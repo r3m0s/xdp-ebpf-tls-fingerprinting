@@ -9,14 +9,16 @@
 ```
 
 # XDP eBPF Module for TLS Client Fingerprinting
-# Initial Concept Discussion
+**Initial Concept Discussion:**
+
 1. Attach basic eBPF module (Socket filters, XDP, Traffic Control)
 2. Implement partial or full JA3/4 (or simple TLS handshake fingerprinting) hashing inside eBPF module
 3. Share updateable JA4 map from user-space with eBPF module
 4. Block incoming traffic based on partial JA3/4 fingerprint (e.g. restricted to HTTP/TLS fingerprinting) hash matches
 5. Test with browser traffic hash
 
-## Useful Links
+**Useful Links:**
+
 - https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967/
 - https://github.com/FoxIO-LLC/ja4
 - https://github.com/salesforce/ja3
@@ -98,17 +100,19 @@ THEIRS: 771,4866-4867-4865-49196-49200-159-52393-52392-52394-49195-49199-158-491
 OURS: 771,4866-4867-4865-49196-49200-159-52393-52392-52394-49195-49199-158-49188-49192-107-49187-49191-103-49162-49172-57-49161-49171-51-157-156-61-60-53-47-255,0-11-10-16-22-23-49-13-43-45-51-21
 ```
 
-## Extra Tools
+# Extra Tools
 The folder "Tools" contains two extra C-programs which generate TLS fingerprints using the OpenSSL "EVP" API.
 
-### Build tools
+## Build Tools
+The two programs for JA3 and JA4 hash calculation can be built using make.
+
 ```sh
 make
 ```
 
-### Raw Data to JA3 hash
+## Raw Data to JA3 Hash
 The `string2ja3` file produces a 32-character JA3 jhash of the raw TLS handshake string using MD5.
-#### Sample output:
+### Sample Output
 ```sh
 # Usage: ./string2ja3 <ja3_raw_string>
 # Example:
@@ -117,9 +121,9 @@ The `string2ja3` file produces a 32-character JA3 jhash of the raw TLS handshake
 JA3 hash: df37f2fd952c0b0b586cf0d9d850c8b2
 ```
 
-### Raw Data to JA4 hash
+## Raw Data to JA4 Hash
 The `string2ja4` file produces a JA4 fingerprint using SHA-256, but keeping the protocol prefix in plaintext.
-#### Sample output:
+### Sample Output
 ```sh
 # Usage: ./string2ja4 <ja4_raw_string>
 # Format: prefix_ciphers_extensions_sigalgs
