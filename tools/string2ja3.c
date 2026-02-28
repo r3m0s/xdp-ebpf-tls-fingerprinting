@@ -2,7 +2,6 @@
 // Converts the raw string into a JA3 hash.
 // Reference Guide: https://tls.peet.ws/
 
-// Created by Alex Matecas
 // ADSS, February 2026.
 
 #include <stdio.h>
@@ -42,4 +41,5 @@ int main(int argc, char *argv[]) {
     }
     
     printf("\n");
+
 }
