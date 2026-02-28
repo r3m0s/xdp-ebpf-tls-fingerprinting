@@ -429,10 +429,11 @@ int minimal_xdp(struct xdp_md *ctx) {
             bpf_perf_event_output(ctx, &fingerprint_events, BPF_F_CURRENT_CPU, &ev, sizeof(ev));
 
             uint64_t hash = 0x4D55;
+            // (hash << 5) multiplies hash by 2^5=32
             hash = ((hash << 5) + hash) ^ ev.version;
-            for (int i = 0; i < 4 && i < ev.ciphers_count; i++)
+            for (int i = 0; i < MAX_TLS_CIPHER_SUITES && i < ev.ciphers_count; i++)
                 hash = ((hash << 5) + hash) ^ ev.ciphers[i];
-            for (int i = 0; i < 4 && i < ev.extensions_count; i++)
+            for (int i = 0; i < MAX_TLS_EXTENSIONS && i < ev.extensions_count; i++)
                 hash = ((hash << 5) + hash) ^ ev.extensions[i];
 
             bpf_printk("Kernelspace hashmap hash = %lx\n", hash);
@@ -448,6 +449,9 @@ int minimal_xdp(struct xdp_md *ctx) {
                 bpf_printk("TLS CLIENT PACKETS PASSED\n");
                 return XDP_PASS;
             }
+        } else {
+            // pass non ClientHello packets for now
+            return XDP_PASS;
         }
     } else if (iph->protocol == IPPROTO_UDP) {
         // 0x11 (= 17): UDP

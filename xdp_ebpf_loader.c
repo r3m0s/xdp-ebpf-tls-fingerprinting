@@ -20,6 +20,8 @@
 #define MAX_TLS_EXTENSIONS 16
 #define MAX_TLS_CIPHER_SUITES 32
 
+#define BLOCKED_JA3_HASH "e95534fc5bdd63a753b688a2fcb20b47"
+
 // event struct from eBPF kernel module
 struct fingerprint_event {
     uint16_t version;
@@ -110,15 +112,15 @@ static void handle_event(void *ctx, int cpu, void *data, uint32_t size) {
     // hash to pass decision for specific fingerprint back to kernel space
     uint64_t hash = 0x4D55;
     hash = ((hash << 5) + hash) ^ event->version;
-    for (int i = 0; i < 4 && i < event->ciphers_count; i++)
+    for (int i = 0; i < MAX_TLS_CIPHER_SUITES && i < event->ciphers_count; i++)
         hash = ((hash << 5) + hash) ^ event->ciphers[i];
-    for (int i = 0; i < 4 && i < event->extensions_count; i++)
+    for (int i = 0; i < MAX_TLS_EXTENSIONS && i < event->extensions_count; i++)
         hash = ((hash << 5) + hash) ^ event->extensions[i];
 
     printf("Userspace hashmap hash: %lx\n\n", hash);
 
     // decide on whether hash is malicious or not
-    uint8_t decision = strncmp(ja3, "af92136ffb2664bb2f6f77597bafcbde", 32) == 0 ? 0 : 1;
+    uint8_t decision = strncmp(ja3, BLOCKED_JA3_HASH, 32) == 0 ? 0 : 1;
 
     // send decision back to kernel space
     bpf_map_update_elem(decisions_fd, &hash, &decision, BPF_ANY);
@@ -177,7 +179,7 @@ int main(int argc, char **argv) {
     int map_fd = bpf_map__fd(map);
 
     // receive and handle events from the kernel, then print them formatted
-    pb = perf_buffer__new(map_fd, 8, handle_event, NULL, NULL, NULL);
+    pb = perf_buffer__new(map_fd, 64, handle_event, NULL, NULL, NULL);
 
     // listen for Ctrl-C and handle signal
     signal(SIGINT, handle_sigint);

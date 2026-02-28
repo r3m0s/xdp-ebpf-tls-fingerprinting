@@ -36,21 +36,29 @@ sudo cat /sys/kernel/debug/tracing/trace_pipe
 ## Local Testing
 1. Load eBPF to lo (loopback) interface: `sudo ./xdp_ebpf_loader lo xdp_ebpf_module.bpf`
 2. Start local python webserver: `sudo python3 tls_server.py`, or for client certificate logging: `sudo python3 tls_server_advanced.py`
-3. Do `curl --insecure -v https://localhost`, insecure (no server certificat verification) and in verbose mode
+3. Do `curl --insecure -v https://127.0.0.1:443`, insecure (no server certificat verification) and in verbose mode
 4. Validate verbose logs in the user space loader and the kernel module's logs
 
 Test with wget and python clients to get other fingerprints:
 
-- `wget https://localhost`
-- `python3 -c "import requests; print(requests.get('https://localhost').text)"`
+- `wget --no-check-certificate -v https://127.0.0.1:443`
+- `python3 -c "import requests; print(requests.get('https://127.0.0.1').text)"`
 
-You could also try a request with a client certificate `curl --insecure -v --key key.pem --cert cert.pem https://localhost`.
+You could also try a request with a client certificate `curl --insecure -v --key key.pem --cert cert.pem https://127.0.0.1`.
 
 ## Remote Testing
 1. Load eBPF to ens3/eth0 interface: `sudo ./xdp_ebpf_loader ens3 xdp_ebpf_module.bpf`
 2. Do `curl https://google.com`
 
 ## Creating Certificates for the Python Server
+One line command that includes subject alternative names (SAN) to make certificate work with wget client:
+
+```sh
+openssl req -x509 -out cert.pem -keyout key.pem -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1"
+```
+
+Manual creation (will not work with wget due to missing SANs):
+
 ```sh
 # Create private key
 openssl genrsa -out key.pem 2048
