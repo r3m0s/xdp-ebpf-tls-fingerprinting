@@ -4,16 +4,16 @@ BPFC=clang
 CFLAGS=-O2 -Wall
 BPFFLAGS=-O2 -g -target bpf -D__TARGET_ARCH_x86 -I..
 
-all: hello.bpf.o loader
+all: xdp_ebpf_module.bpf xdp_ebpf_loader
 
-hello.bpf.o: simple_execve.c
+xdp_ebpf_module.bpf: xdp_ebpf_module.c
 	$(BPFC) $(BPFFLAGS) -c -o $@ $^
 
-loader: loader.c
-	$(CC) $(CFLAGS) -o $@ $^ -lbpf
+# requires openssl development package installation: sudo apt install libssl-dev
+xdp_ebpf_loader: xdp_ebpf_loader.c
+	$(CC) $(CFLAGS) -o $@ $^ -lbpf -lssl -lcrypto
 
 clean:
 
 mrproper:
-	rm -f *.bpf.o loader
-
+	rm -f *.bpf xdp_ebpf_loader
