@@ -38,7 +38,7 @@ This project is an experimental proof-of-concept to inspect inbound network traf
 # build loader and XDP eBPF module
 make
 # attach module to loopback interface
-sudo ./xdp_ebpf_loader lo xdp_ebpf_module.bpf
+sudo ./xdp_ebpf_loader.o lo xdp_ebpf_module.bpf
 # hook into module's kernel debug logs in separate terminal window
 sudo cat /sys/kernel/debug/tracing/trace_pipe
 ```
@@ -46,7 +46,7 @@ sudo cat /sys/kernel/debug/tracing/trace_pipe
 ## Local Testing
 Create a local public/private key pair and a certificate for the python webserver that will be running on `127.0.0.1` according to the descriptions in [Creating Certificates for the Python Server](#creating-certificates-for-the-python-server).
 
-1. Load eBPF to lo (loopback) interface: `sudo ./xdp_ebpf_loader lo xdp_ebpf_module.bpf`
+1. Load eBPF to lo (loopback) interface: `sudo ./xdp_ebpf_loader.o lo xdp_ebpf_module.bpf`
 2. Start local python webserver: `sudo python3 tls_server.py`, or for client certificate logging: `sudo python3 tls_server_advanced.py`
 3. Do `curl --insecure -v https://127.0.0.1:443`, insecure (no server certificat verification) and in verbose mode
 4. Validate verbose logs in the user space loader and the kernel module's logs
@@ -59,7 +59,7 @@ Test with wget and python clients to get other fingerprints:
 You could also try a request with a client certificate `curl --insecure -v --key key.pem --cert cert.pem https://127.0.0.1`.
 
 ## Remote Testing
-1. Load eBPF to ens3/eth0 interface: `sudo ./xdp_ebpf_loader ens3 xdp_ebpf_module.bpf`
+1. Load eBPF to ens3/eth0 interface: `sudo ./xdp_ebpf_loader.o ens3 xdp_ebpf_module.bpf`
 2. Do `curl https://google.com`
 
 ## Creating Certificates for the Python Server
