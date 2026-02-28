@@ -2,7 +2,6 @@
 // Converts the raw string into a JA4 hash.
 // Reference Guide: https://tls.peet.ws/
 
-// Created by Alex Matecas
 // ADSS, February 2026.
 
 #include <stdio.h>
@@ -98,4 +97,5 @@ int main(int argc, char *argv[]) {
 
     // Print the final JA4 output
     printf("%s_%s_%s\n", prefix, cipher_hash, ext_hash);
+
 }
