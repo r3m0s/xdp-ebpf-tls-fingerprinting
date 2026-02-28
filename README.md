@@ -9,7 +9,9 @@
 ```
 
 # XDP eBPF Module for TLS Client Fingerprinting
-**Initial Concept Discussion:**
+This project is an experimental proof-of-concept to inspect inbound network traffic and block a specific TLS client using fingerprinting mechanisms at high-speed directly within an Express Data Path (XDP) Extended Berkeley Packet Filter (eBPF) module running in the Linux kernel, attached to the network driver's XDP-hook. Development took place during the advanced system security (ADSS) lecture at the Lucerne University of Applied Sciences and Arts (HSLU), further extensions and restrictions might be introduced at a future point in time.
+
+**Initial Group Concept Discussion:**
 
 1. Attach basic eBPF module (Socket filters, XDP, Traffic Control)
 2. Implement partial or full JA3/4 (or simple TLS handshake fingerprinting) hashing inside eBPF module
@@ -19,13 +21,19 @@
 
 **Useful Links:**
 
-- https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967/
-- https://github.com/FoxIO-LLC/ja4
-- https://github.com/salesforce/ja3
-- https://sslbl.abuse.ch/ja3-fingerprints/
-- https://labs.iximiuz.com/tutorials/ebpf-xdp-fundamentals-6342d24e
+- Blog Post 1 on JA3 by Jon Althouse: https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967/
+- Blog Post 2 on JA3 by Jon Althouse: https://engineering.salesforce.com/open-sourcing-ja3-92c9e53c3c41/
+- Original Repository by Jon Althouse, Jeff Atkinson, Josh Atkins: https://github.com/salesforce/ja3
+- Modern JA4+ fingerprinting: https://github.com/FoxIO-LLC/ja4
+- Database of malicious JA3 fingerprints by abuse.ch: https://sslbl.abuse.ch/ja3-fingerprints/
+- Tigera XDP eBPF tutorial: https://www.tigera.io/learn/guides/ebpf/ebpf-xdp/
+- In-depth lab visualizations by Teodor Janez Podobnik: https://labs.iximiuz.com/tutorials/ebpf-xdp-fundamentals-6342d24e
+- Original TLS fingerprinting idea from Lee Brotherston: https://github.com/LeeBrotherston/tls-fingerprinting/tree/master/fingerprintls
 
-# Usage
+# Usage Instructions
+> [!WARNING]  
+> Loading this kernel module could lock you out of your virtual machine. Use at your own risk.
+
 ```sh
 # build loader and XDP eBPF module
 make
