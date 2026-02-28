@@ -34,6 +34,8 @@ sudo cat /sys/kernel/debug/tracing/trace_pipe
 ```
 
 ## Local Testing
+Create a local public/private key pair and a certificate for the python webserver that will be running on `127.0.0.1` according to the descriptions in [Creating Certificates for the Python Server](#creating-certificates-for-the-python-server).
+
 1. Load eBPF to lo (loopback) interface: `sudo ./xdp_ebpf_loader lo xdp_ebpf_module.bpf`
 2. Start local python webserver: `sudo python3 tls_server.py`, or for client certificate logging: `sudo python3 tls_server_advanced.py`
 3. Do `curl --insecure -v https://127.0.0.1:443`, insecure (no server certificat verification) and in verbose mode
@@ -51,13 +53,13 @@ You could also try a request with a client certificate `curl --insecure -v --key
 2. Do `curl https://google.com`
 
 ## Creating Certificates for the Python Server
-One line command that includes subject alternative names (SAN) to make certificate work with wget client:
+One line command that includes subject alternative names (SAN) to make certificate work with `wget` client:
 
 ```sh
 openssl req -x509 -out cert.pem -keyout key.pem -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1"
 ```
 
-Manual creation (will not work with wget due to missing SANs):
+Manual creation (will not work with `wget` due to missing SANs):
 
 ```sh
 # Create private key
@@ -127,12 +129,9 @@ The `string2ja4` file produces a JA4 fingerprint using SHA-256, but keeping the 
 JA4 hash: t13d1516h2_8daaf6152771_d8a2da3f94cd
 ```
 
-## Cleanup
-- `sudo ip link set dev lo xdpgeneric off`
-- `sudo ip link set dev ens3 xdpgeneric off`
-
 # Known Errors and Fixes
-Fixing error when compiling minimal XDP packet capturing tool. Error message when compiling with make:
+## ASM Types File not Found Error
+Fixing error when compiling minimal XDP packet capturing tool. Error message when compiling with `make`:
 
 ```sh
 clang -O2 -g -target bpf -D__TARGET_ARCH_x86 -I.. -c -o minimal_xdp.bpf minimal_xdp.c
@@ -141,9 +140,12 @@ In file included from /usr/include/linux/ip.h:20:
 /usr/include/linux/types.h:5:10: fatal error: 'asm/types.h' file not found
 ```
 
-
 Solution (see: https://stackoverflow.com/questions/77454504/asm-types-h-error-during-compilation-of-ebpf-code):
 
 ```sh
 sudo ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/asm
 ```
+
+## Cleanup XDP Module Manually
+- `sudo ip link set dev lo xdpgeneric off`
+- `sudo ip link set dev ens3 xdpgeneric off`
