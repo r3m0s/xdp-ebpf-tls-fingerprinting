@@ -1,3 +1,5 @@
+// Copyright (C) 2026
+
 // IMPORTANT: sizeof(tlshdr) cannot be used as offset as it adds a padding byte, resulting in offset 6 instead of hardcoded 5
 // NOTE: __attribute__((packed)) modifier cannot be used in eBPF to disable padding between fields and avoid misalignment while parsing network packets
 // IMPORTANT: XDP acts at layer 2; Therefore fragmented packets may occur due to XDP's truncation of packets, they would need to be reassembled before processing -> full reassembly needs TC or kernel patches.

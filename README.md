@@ -21,14 +21,14 @@ This project is an experimental proof-of-concept to inspect inbound network traf
 
 **Useful Links:**
 
-- Blog Post 1 on JA3 by Jon Althouse: https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967/
-- Blog Post 2 on JA3 by Jon Althouse: https://engineering.salesforce.com/open-sourcing-ja3-92c9e53c3c41/
-- Original Repository by Jon Althouse, Jeff Atkinson, Josh Atkins: https://github.com/salesforce/ja3
-- Modern JA4+ fingerprinting: https://github.com/FoxIO-LLC/ja4
-- Database of malicious JA3 fingerprints by abuse.ch: https://sslbl.abuse.ch/ja3-fingerprints/
-- Tigera XDP eBPF tutorial: https://www.tigera.io/learn/guides/ebpf/ebpf-xdp/
-- In-depth lab visualizations by Teodor Janez Podobnik: https://labs.iximiuz.com/tutorials/ebpf-xdp-fundamentals-6342d24e
-- Original TLS fingerprinting idea from Lee Brotherston: https://github.com/LeeBrotherston/tls-fingerprinting/tree/master/fingerprintls
+- [Blog Post 1 on JA3 by Jon Althouse](https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967)
+- [Blog Post 2 on JA3 by Jon Althouse](https://engineering.salesforce.com/open-sourcing-ja3-92c9e53c3c41)
+- [Original Repository by Jon Althouse, Jeff Atkinson, Josh Atkins](https://github.com/salesforce/ja3)
+- [Modern JA4+ fingerprinting](https://github.com/FoxIO-LLC/ja4)
+- [Database of malicious JA3 fingerprints by abuse.ch](https://sslbl.abuse.ch/ja3-fingerprints)
+- [Tigera XDP eBPF tutorial](https://www.tigera.io/learn/guides/ebpf/ebpf-xdp)
+- [In-depth lab visualizations by Teodor Janez Podobnik](https://labs.iximiuz.com/tutorials/ebpf-xdp-fundamentals-6342d24e)
+- [Original TLS fingerprinting idea from Lee Brotherston](https://github.com/LeeBrotherston/tls-fingerprinting/tree/master/fingerprintls)
 
 # Usage Instructions
 > [!WARNING]  

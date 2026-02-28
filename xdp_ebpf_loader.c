@@ -1,3 +1,5 @@
+// Copyright (C) 2026
+
 // perror()
 #include <errno.h>
 // if_nametoindex
